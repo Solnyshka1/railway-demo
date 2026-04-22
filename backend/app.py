@@ -1,8 +1,86 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template_string
 import os
 import psycopg2
 
 app = Flask(__name__)
+
+HTML_PAGE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fullstack App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+        }
+        li {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Full-Stack App</h1>
+    <p><b>Student:</b> Madina</p>
+    <p><b>ID:</b> 123456</p>
+
+    <h2>Add item</h2>
+    <input id="input" placeholder="Enter text">
+    <button onclick="addItem()">Add</button>
+
+    <h2>Items</h2>
+    <ul id="list"></ul>
+
+    <script>
+        const API = "/api/data";
+
+        async function loadItems() {
+            const res = await fetch(API);
+            const data = await res.json();
+
+            const list = document.getElementById("list");
+            list.innerHTML = "";
+
+            data.forEach(item => {
+                const li = document.createElement("li");
+                li.innerHTML = item.name + " <button onclick='deleteItem(" + item.id + ")'>Delete</button>";
+                list.appendChild(li);
+            });
+        }
+
+        async function addItem() {
+            const input = document.getElementById("input");
+
+            if (!input.value.trim()) return;
+
+            await fetch(API, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({name: input.value})
+            });
+
+            input.value = "";
+            loadItems();
+        }
+
+        async function deleteItem(id) {
+            await fetch(API + "/" + id, {
+                method: "DELETE"
+            });
+
+            loadItems();
+        }
+
+        loadItems();
+    </script>
+</body>
+</html>
+"""
 
 def get_connection():
     database_url = os.getenv("DATABASE_URL")
@@ -23,7 +101,7 @@ def init_db():
 
 @app.route('/')
 def home():
-    return '<h1>Backend works!</h1><p>API is running on Railway.</p>'
+    return render_template_string(HTML_PAGE)
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
