@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fullstack App</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    input, button { padding: 8px; margin: 5px; }
+    li { margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Full-Stack CI/CD App</h1>
+  <p><strong>Student Name:</strong> Madina</p>
+  <p><strong>Student ID:</strong> 123456</p>
+
+  <h2>Add Item</h2>
+  <input type="text" id="nameInput" placeholder="Enter item name">
+  <button onclick="addItem()">Add</button>
+
+  <h2>Items</h2>
+  <ul id="itemsList"></ul>
+
+  <script>
+    const API_URL = window.location.hostname.includes("localhost")
+      ? "http://localhost:5000/api/data"
+      : "${VITE_API_URL}/api/data";
+
+    async function loadItems() {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+
+      const list = document.getElementById("itemsList");
+      list.innerHTML = "";
+
+      data.forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = item.name + " <button onclick='deleteItem(" + item.id + ")'>Delete</button>";
+        list.appendChild(li);
+      });
+    }
+
+    async function addItem() {
+      const input = document.getElementById("nameInput");
+      const name = input.value;
+
+      if (!name) return;
+
+      await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name })
+      });
+
+      input.value = "";
+      loadItems();
+    }
+
+    async function deleteItem(id) {
+      await fetch(API_URL + "/" + id, {
+        method: "DELETE"
+      });
+
+      loadItems();
+    }
+
+    loadItems();
+  </script>
+</body>
+</html>
