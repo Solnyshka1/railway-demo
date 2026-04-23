@@ -25,7 +25,7 @@ def init_db():
 
 @app.route('/')
 def home():
-    return '<h1>Backend works!</h1><p>API is running on Railway.</p>'
+    return '<h1>Backend with CORS works!</h1><p>Updated version is running.</p>'
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
