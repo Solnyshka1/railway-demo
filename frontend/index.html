@@ -33,7 +33,7 @@
     <ul id="list"></ul>
 
     <script>
-        const API = "https://railway-demo-production-314f.up.railway.app/";
+        const API = "https://railway-demo-production-314f.up.railway.app/api/data";
 
         async function loadItems() {
             try {
@@ -60,13 +60,19 @@
             if (!name) return;
 
             try {
-                await fetch(API, {
+                const res = await fetch(API, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({ name: name })
                 });
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error("POST failed:", text);
+                    return;
+                }
 
                 input.value = "";
                 loadItems();
@@ -77,9 +83,15 @@
 
         async function deleteItem(id) {
             try {
-                await fetch(API + "/" + id, {
+                const res = await fetch(API + "/" + id, {
                     method: "DELETE"
                 });
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error("DELETE failed:", text);
+                    return;
+                }
 
                 loadItems();
             } catch (error) {
