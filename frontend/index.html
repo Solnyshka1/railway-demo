@@ -2,25 +2,28 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Fullstack Frontend</title>
+    <title>Full-Stack App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 40px;
         }
+        h1, h2 {
+            margin-bottom: 20px;
+        }
         input, button {
-            padding: 8px;
+            padding: 10px;
             margin: 5px;
+            font-size: 16px;
         }
         li {
             margin: 10px 0;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
     <h1>Full-Stack App</h1>
-    <p><b>Student:</b> Madina</p>
-    <p><b>ID:</b> 123456</p>
 
     <h2>Add item</h2>
     <input id="input" placeholder="Enter text">
@@ -30,43 +33,58 @@
     <ul id="list"></ul>
 
     <script>
-        const API = "https://empowering-beauty-production-bc48.up.railway.app/api/data";
+        const API = "https://railway-demo-production-314f.up.railway.app/";
 
         async function loadItems() {
-            const res = await fetch(API);
-            const data = await res.json();
+            try {
+                const res = await fetch(API);
+                const data = await res.json();
 
-            const list = document.getElementById("list");
-            list.innerHTML = "";
+                const list = document.getElementById("list");
+                list.innerHTML = "";
 
-            data.forEach(item => {
-                const li = document.createElement("li");
-                li.innerHTML = item.name + " <button onclick='deleteItem(" + item.id + ")'>Delete</button>";
-                list.appendChild(li);
-            });
+                data.forEach(item => {
+                    const li = document.createElement("li");
+                    li.innerHTML = item.name + " <button onclick='deleteItem(" + item.id + ")'>Delete</button>";
+                    list.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Load error:", error);
+            }
         }
 
         async function addItem() {
             const input = document.getElementById("input");
+            const name = input.value.trim();
 
-            if (!input.value.trim()) return;
+            if (!name) return;
 
-            await fetch(API, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({name: input.value})
-            });
+            try {
+                await fetch(API, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ name: name })
+                });
 
-            input.value = "";
-            loadItems();
+                input.value = "";
+                loadItems();
+            } catch (error) {
+                console.error("Add error:", error);
+            }
         }
 
         async function deleteItem(id) {
-            await fetch(API + "/" + id, {
-                method: "DELETE"
-            });
+            try {
+                await fetch(API + "/" + id, {
+                    method: "DELETE"
+                });
 
-            loadItems();
+                loadItems();
+            } catch (error) {
+                console.error("Delete error:", error);
+            }
         }
 
         loadItems();

@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
 import psycopg2
 
 app = Flask(__name__)
+CORS(app)
 
 def get_connection():
     database_url = os.getenv("DATABASE_URL")
@@ -40,14 +42,21 @@ def get_data():
 @app.route('/api/data', methods=['POST'])
 def add_data():
     data = request.get_json()
-    name = data.get("name")
+
+    if not data or "name" not in data:
+        return jsonify({"error": "Name is required"}), 400
+
+    name = data["name"].strip()
 
     if not name:
         return jsonify({"error": "Name is required"}), 400
 
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO items (name) VALUES (%s) RETURNING id, name", (name,))
+    cur.execute(
+        "INSERT INTO items (name) VALUES (%s) RETURNING id, name",
+        (name,)
+    )
     row = cur.fetchone()
     conn.commit()
     cur.close()
