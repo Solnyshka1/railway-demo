@@ -17,5 +17,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /root/railway-demo
-            git pull
+            git fetch origin
+            git reset --hard origin/main
             docker-compose up -d --build
